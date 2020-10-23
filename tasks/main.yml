@@ -292,28 +292,40 @@
     msg: "Vault is {{ vault_http_status[check_result.status|string] }}"
   tags:
     - check_vault
+  
+- name: DEBUG VALUE
+  msg: "check_vault: {{ check_vault }}"
 
 
 #TODO - WIP - S%#$ be untested
 - name: Initialize Vault
   shell: vault operator init -key-shares={{ vault_key_shares }} -key-threshold={{ vault_key_threshold }} > {{ vault_key_file }}
   when: 
-    - ansible_facts['check_result'] == "501"
-    - {{ vault_initialize }}
+    - check_result == "501"
+    - vault_initialize | bool
 
 #for n in {1..{{ vault_key_threshold }}}; do vault operator unseal $(grep 'Key '$n':' key.txt | awk '{print $NF}'); done
 - name: Unseal Vault
   shell: /usr/local/bin/vault operator unseal $(grep 'Key 1:' {{ vault_key_file }} | awk '{print $NF}')
   when: 
-    - ansible_facts['check_result'] == "503" 
-    - {{ vault_unseal_on_run }}
+    - check_result == "503" 
+    - vault_unseal_on_run | bool
+
+- name: Check that the key file exists
+  stat:
+    path: "{{ vault_key_file }}"
+  register: key_result
+
 
 #Leaving it up to the person running this to backup and remove this file after run
 - name: Securing Key file
   file:
-    path: {{ vault_key_file }}
+    path: "{{ vault_key_file }}"
     owner: vault
     mode: '0600'
+  when:
+    - vault_initialize | bool
+    - key_result.stat.exists | bool
 
 # For later use of automating secret engines setup + configuration utilizing root token
 #- name: Getting Root Token and setting it as a fact
