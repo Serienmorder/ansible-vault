@@ -311,10 +311,10 @@
     - check_result == "503" 
     - vault_unseal_on_run | bool
 
-- name: Check that the key file exists
-  stat:
-    path: "{{ vault_key_file }}"
-  register: key_result
+#- name: Check that the key file exists
+#  stat:
+#    path: "{{ vault_key_file }}"
+#  register: key_result
 
 
 #Leaving it up to the person running this to backup and remove this file after run
@@ -325,7 +325,7 @@
     mode: '0600'
   when:
     - vault_initialize | bool
-    - key_result.stat.exists | bool
+#    - key_result.stat.exists | bool
 
 # For later use of automating secret engines setup + configuration utilizing root token
 #- name: Getting Root Token and setting it as a fact
