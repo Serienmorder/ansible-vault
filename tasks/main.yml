@@ -291,11 +291,11 @@
   debug:
     msg: "Vault is {{ vault_http_status[check_result.status|string] }}"
   tags:
-    - check_vault
+    - check_result
   
 - name: DEBUG VALUE
   debug:
-    msg: "check_vault: {{ check_vault }}"
+    msg: "check_result: {{ check_result }}"
 
 
 #TODO - WIP - S%#$ be untested
