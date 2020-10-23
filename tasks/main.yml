@@ -304,7 +304,7 @@
 - name: Unseal Vault
   shell: /usr/local/bin/vault operator unseal $(grep 'Key 1:' {{ vault_key_file }} | awk '{print $NF}')
   when: 
-    - check_result.status|string == "503" 
+    - (check_result.status|string == "503") or (check_result.status|string == "501" and vault_initialize | bool)
     - vault_unseal_on_run | bool
   environment:
     VAULT_ADDR: "{{ vault_tls_disable | ternary('http', 'https') }}://{{ vault_address }}:{{ vault_port }}"
