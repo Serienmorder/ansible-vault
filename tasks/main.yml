@@ -292,31 +292,28 @@
     msg: "Vault is {{ vault_http_status[check_result.status|string] }}"
   tags:
     - check_result
-  
-- name: DEBUG VALUE
-  debug:
-    msg: "check_result: {{ check_result.status|string }}"
 
-
-#TODO - WIP - S%#$ be untested
 - name: Initialize Vault
-  shell: vault operator init -key-shares={{ vault_key_shares }} -key-threshold={{ vault_key_threshold }} > {{ vault_key_file }}
+  shell: /usr/local/bin/vault operator init -key-shares={{ vault_key_shares }} -key-threshold={{ vault_key_threshold }} > {{ vault_key_file }}
   when: 
     - check_result.status|string == "501"
     - vault_initialize | bool
+  environment:
+    VAULT_ADDR: "{{ vault_tls_disable | ternary('http', 'https') }}://{{ vault_address }}:{{ vault_port }}"
 
-#for n in {1..{{ vault_key_threshold }}}; do vault operator unseal $(grep 'Key '$n':' key.txt | awk '{print $NF}'); done
 - name: Unseal Vault
   shell: /usr/local/bin/vault operator unseal $(grep 'Key 1:' {{ vault_key_file }} | awk '{print $NF}')
   when: 
     - check_result.status|string == "503" 
     - vault_unseal_on_run | bool
+  environment:
+    VAULT_ADDR: "{{ vault_tls_disable | ternary('http', 'https') }}://{{ vault_address }}:{{ vault_port }}"
+  
 
 - name: Check that the key file exists
   stat:
     path: "{{ vault_key_file }}"
   register: key_result
-
 
 #Leaving it up to the person running this to backup and remove this file after run
 - name: Securing Key file
@@ -331,7 +328,7 @@
 # For later use of automating secret engines setup + configuration utilizing root token
 #- name: Getting Root Token and setting it as a fact
 #  shell: |
-#    grep 'Token:' /etc/vault.d/key | awk '{print $NF}'
+#    grep 'Token:' {{ vault_key_file }} | awk '{print $NF}'
 #    exit 0
 #  register: vault_token
   
