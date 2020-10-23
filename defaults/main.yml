@@ -268,6 +268,16 @@ vault_softcard_enable: false
 vault_telemetry_enabled: false
 
 # ---------------------------------------------------------------------------
+# Initialization variables
+# ---------------------------------------------------------------------------
+
+vault_initialize: true
+vault_key_file: /etc/vault.d/key
+vault_key_shares: 1
+vault_key_threshold: 1
+vault_unseal_on_run: true
+
+# ---------------------------------------------------------------------------
 # Enterprise related variables
 # ---------------------------------------------------------------------------
 
